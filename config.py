@@ -10,11 +10,12 @@ dataset_path = os.path.join(working_dir, "roadSignSet")
 model_path = os.path.join(working_dir, "weights", "best_model.zip")
 
 # DEFINE MODEL
+# See here [https://pytorch.org/vision/stable/models.html]
 #model_class = torchvision.models.AlexNet
 model_class = torchvision.models.resnet18
 
 # TRAINING PARAMETERS
-LEARNING_RATE = 0.001
+LEARNING_RATE = 0.0001
 BATCH_SIZE = 16
 EPOCHS = 20
 
