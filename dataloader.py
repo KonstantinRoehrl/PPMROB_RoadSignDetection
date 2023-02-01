@@ -12,11 +12,14 @@ from config import color as col
 
 
 class RoadSignSet(Dataset):
-    def __init__(self, split, dataset_path, mean=None, std=None, normalize=True):
+    def __init__(self, split, dataset_path):
         self.dataset_path = dataset_path
         self.split = split
-        self.mean = mean
-        self.std = std
+
+        # Hardcoded for RoadSignSet
+        self.mean =  (0.4307480482741943, 0.4665043564842691, 0.6313285444108061)
+        self.std =  (0.12267207683226942, 0.03794770827614883, 0.05556710696554743)  
+
         if self.split not in ['train', 'test']:
             raise ValueError("Split only allowed to be either 'train' or 'test'.")
         self.samples = self.load_samples()
@@ -25,16 +28,20 @@ class RoadSignSet(Dataset):
 
         print(col.YELLOW, f"=> Loaded {len(self.samples)} images for {self.split} split.", col.END)
 
-        if normalize and mean != None and std != None:
+        if self.split == 'train':
+            # Augmentations for train split
             self.transform = transforms.Compose([
                                         transforms.ToTensor(),
                                         transforms.Resize(size=size),
-                                        transforms.Normalize(mean=mean, std=std)
+                                        transforms.ColorJitter(brightness=(0.8,1.2),contrast=(0.8, 1.2),saturation=(0.8,1.2),hue=(-0.1, 0.1)),
+                                        transforms.Normalize(mean=self.mean, std=self.std),
                                         ])
-        else:
+        else: 
+            # No color jitter for eval split
             self.transform = transforms.Compose([
                                         transforms.ToTensor(),
-                                        transforms.Resize(size=size)
+                                        transforms.Resize(size=size),
+                                        transforms.Normalize(mean=self.mean, std=self.std),
                                         ])
 
 
@@ -75,11 +82,17 @@ class RoadSignSet(Dataset):
     def __getitem__(self, idx):
         sample = self.samples[idx]
         image = cv2.imread(sample['path'])
+
+        # Convert to yuv
         image = cv2.cvtColor(image, cv2.COLOR_BGR2YUV)
 
+        # Create one-hot vector
         label = sample['label']
         labels = torch.zeros(4)
         labels[label - 1] = 1
+
+        # Augmentation
         if self.transform != None:
             image = self.transform(image)
+
         return image.float(), labels
