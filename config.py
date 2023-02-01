@@ -1,6 +1,7 @@
 from pathlib import Path
 import os
 import torch
+import torchvision
 import sys
 
 # PATHS
@@ -8,8 +9,12 @@ working_dir = Path(__file__).parent
 dataset_path = os.path.join(working_dir, "roadSignSet")
 model_path = os.path.join(working_dir, "weights", "best_model.zip")
 
+# DEFINE MODEL
+#model_class = torchvision.models.AlexNet
+model_class = torchvision.models.resnet18
+
 # TRAINING PARAMETERS
-LEARNING_RATE = 0.01
+LEARNING_RATE = 0.001
 BATCH_SIZE = 16
 EPOCHS = 20
 
