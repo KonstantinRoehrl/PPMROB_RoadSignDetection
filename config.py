@@ -9,10 +9,17 @@ working_dir = Path(__file__).parent
 dataset_path = os.path.join(working_dir, "roadSignSet")
 model_path = os.path.join(working_dir, "weights", "best_model.zip")
 
+# Create weight folder, if doesn't exist
+if not os.path.exists(os.path.join(working_dir, 'weights')):
+   os.mkdir(os.path.join(working_dir, 'weights'))
+
 # DEFINE MODEL
 # See here [https://pytorch.org/vision/stable/models.html]
-#model_class = torchvision.models.AlexNet
-model_class = torchvision.models.resnet18
+#model_class = torchvision.models.AlexNet        # Accuracy 80.75
+model_class = torchvision.models.resnet18      # Accuracy 100%
+#model_class = torchvision.models.resnet50 
+
+
 
 # TRAINING PARAMETERS
 LEARNING_RATE = 0.0001
