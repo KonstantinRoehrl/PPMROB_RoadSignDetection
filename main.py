@@ -1,6 +1,4 @@
 import torch
-import torchvision
-import torchvision.transforms as transforms
 import torch.optim as optim
 import numpy as np
 from sklearn.metrics import confusion_matrix
@@ -9,7 +7,6 @@ from tqdm import tqdm
 from dataloader import RoadSignSet
 import config as cfg
 from config import color as col
-from model import CNNClassifier
 
 def calculate_mean_std(dataset: torch.utils.data.Dataset, recalculate=False):
   if(recalculate):
@@ -46,7 +43,6 @@ def eval(data_loader, model):
     progress.set_description("Evaluating")
     y_true = np.zeros(0)
     y_pred = np.zeros(0)
-
     # since we're not training, we don't need to calculate the gradients for our outputs
     with torch.no_grad():
         for data in progress:
@@ -54,6 +50,8 @@ def eval(data_loader, model):
             images, labels = images.to(cfg.DEVICE), labels.to(cfg.DEVICE)
             # calculate outputs by running images through the network
             outputs = model(images)
+            outputs = torch.softmax(outputs, dim=1)
+
             # the class with the highest confidence is what we choose as prediction
             _, predicted = torch.max(outputs, 1)
 
@@ -75,16 +73,17 @@ def train(data_loader, model, optimizer, criterion):
     progress = tqdm(data_loader)
     progress.set_description("Train Network")
     for k, data in enumerate(progress):
+
         # get the inputs; data is a list of [inputs, labels]
         images, labels = data
         images, labels = images.to(cfg.DEVICE), labels.to(cfg.DEVICE)
-
 
         # zero the parameter gradients
         optimizer.zero_grad()
         # forward + backward + optimize
         outputs = model(images)
 
+        outputs = torch.softmax(outputs, dim=1)
         loss = criterion(outputs, labels)
 
         loss.backward()
@@ -100,18 +99,15 @@ if __name__ == '__main__':
     # full_loader = torch.utils.data.ConcatDataset([train_set, test_set])
     # mean, std = calculate_mean_std(full_loader, recalculate=True)
 
-    mean, std = calculate_mean_std(None, recalculate=False)
+    # Train data
+    train_set = RoadSignSet(split='train', dataset_path=cfg.dataset_path)
+    train_loader = torch.utils.data.DataLoader(train_set, batch_size=cfg.BATCH_SIZE, shuffle=True)
 
-    train_set = RoadSignSet(split='train', dataset_path=cfg.dataset_path, mean=mean, std=std, normalize=True)
-    train_loader = torch.utils.data.DataLoader(train_set, batch_size=cfg.BATCH_SIZE, shuffle=True, num_workers=2)
+    # Test data
+    test_set = RoadSignSet(split='test', dataset_path=cfg.dataset_path)
+    test_loader = torch.utils.data.DataLoader(test_set, batch_size=cfg.BATCH_SIZE, shuffle=True)
 
-
-    test_set = RoadSignSet(split='test', dataset_path=cfg.dataset_path, mean=mean, std=std, normalize=True)
-    test_loader = torch.utils.data.DataLoader(test_set, batch_size=cfg.BATCH_SIZE, shuffle=True, num_workers=2)
-
-    full_loader = torch.utils.data.ConcatDataset([train_set, test_set])
-
-    model = CNNClassifier()
+    model = cfg.model_class(num_classes=4)
     model.to(cfg.DEVICE)
 
     criterion = torch.nn.CrossEntropyLoss()
