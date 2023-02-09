@@ -1,8 +1,11 @@
 import torch
+torch.manual_seed(0)  # Deterministic training results
 import torch.optim as optim
 import numpy as np
+import torchvision
 from sklearn.metrics import confusion_matrix
 from tqdm import tqdm
+import sys
 
 from dataloader import RoadSignSet
 import config as cfg
@@ -92,7 +95,7 @@ def train(data_loader, model, optimizer, criterion):
 if __name__ == '__main__':
 
     # For normalizing, we need mean and std. This is hardcoded already.
-    # If you want to recalculate it, uncomment this code and then paste it into above function
+    # If you want to recalculate it, uncomment this code and then paste it into above dataloader __init__() function
 
     # train_set = RoadSignSet(split='train', dataset_path=cfg.dataset_path, normalize=False)
     # test_set = RoadSignSet(split='test', dataset_path=cfg.dataset_path, normalize=False)
@@ -107,12 +110,15 @@ if __name__ == '__main__':
     test_set = RoadSignSet(split='test', dataset_path=cfg.dataset_path)
     test_loader = torch.utils.data.DataLoader(test_set, batch_size=cfg.BATCH_SIZE, shuffle=True)
 
+    # Model
     model = cfg.model_class(num_classes=4)
     model.to(cfg.DEVICE)
 
+    # Loss and optimizer
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=cfg.LEARNING_RATE)
 
+    # Verifying random initialisation => ~25% accuracy
     best_accuracy = 0.
     accuracy = eval(data_loader=test_loader, model=model)
     print(col.BLUE, f"Warm up accuracy: {accuracy:.2f}", col.END)
@@ -128,3 +134,31 @@ if __name__ == '__main__':
             torch.save(model.state_dict(), cfg.model_path)
         else: 
             print(col.YELLOW, f"Accuracy: {accuracy:.2f}", col.END)
+
+        if best_accuracy == 100.:
+            # Won't get any better
+            break
+
+    # Training finished. Let's quantize the model
+
+    # Workaround on Mac for quantized backend
+    # https://github.com/pytorch/pytorch/issues/29327      
+    if sys.platform == 'darwin':
+      torch.backends.quantized.engine = 'qnnpack'
+    
+    # Quantize the model
+    model_int8 = torch.quantization.quantize_dynamic(
+                  model.to('cpu'),  # the original model
+                  {torch.nn.Linear},  # a set of layers to dynamically quantize
+                  dtype=torch.qint8)  # the target dtype for quantized weights
+    
+    # Quantised model not supported for mps backend
+    cfg.DEVICE = torch.device('cpu')
+
+    # Check quantised model accuracy
+    accuracy = eval(data_loader=test_loader, model=model_int8)
+    print(col.BLUE, f"Quantized Model Accuracy: {accuracy:.2f}")
+
+    # Save Model
+    torch.save(model.state_dict(), cfg.model_path.replace(".zip", "_quant.zip"))
+

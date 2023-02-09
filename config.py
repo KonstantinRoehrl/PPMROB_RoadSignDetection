@@ -17,8 +17,7 @@ if not os.path.exists(os.path.join(working_dir, 'weights')):
 # See here [https://pytorch.org/vision/stable/models.html]
 #model_class = torchvision.models.AlexNet        # Accuracy 80.75
 model_class = torchvision.models.resnet18      # Accuracy 100%
-#model_class = torchvision.models.resnet50 
-
+#model_class = torchvision.models.resnet50       # Accuracy 95.4 
 
 
 # TRAINING PARAMETERS
