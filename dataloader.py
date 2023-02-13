@@ -10,6 +10,23 @@ import torchvision.transforms as transforms
 import config as cfg
 from config import color as col
 
+class UnNormalize(object):
+    def __init__(self):
+        # Hardcoded for RoadSignSet
+        self.mean =  (0.4307480482741943, 0.4665043564842691, 0.6313285444108061)
+        self.std =  (0.12267207683226942, 0.03794770827614883, 0.05556710696554743)  
+
+    def __call__(self, tensor):
+        """
+        Args:
+            tensor (Tensor): Tensor image of size (C, H, W) to be normalized.
+        Returns:
+            Tensor: Normalized image.
+        """
+        for t, m, s in zip(tensor, self.mean, self.std):
+            t.mul_(s).add_(m)
+        return tensor
+
 
 class RoadSignSet(Dataset):
     def __init__(self, split, dataset_path):
@@ -24,7 +41,7 @@ class RoadSignSet(Dataset):
             raise ValueError("Split only allowed to be either 'train' or 'test'.")
         self.samples = self.load_samples()
 
-        size = (256, 256)
+        size = (128, 128)
 
         print(col.YELLOW, f"=> Loaded {len(self.samples)} images for {self.split} split.", col.END)
 
@@ -64,10 +81,12 @@ class RoadSignSet(Dataset):
 
                     image_num = int(image.replace(".png", ""))
                     
-                    # Every fifth image goes to eval split
-                    if (image_num % 5 == 0 and self.split == 'train') or (image_num % 5 != 0 and self.split == 'test'):
-                        continue
+                    # NOTE: Old datasplit (Every fifth image for datasplit)
+                    #if (image_num % 5 == 0 and self.split == 'train') or (image_num % 5 != 0 and self.split == 'test'):
+                    #    continue
 
+                    if (self.split == 'train' and image_num < 50) or (image_num >= 50 and self.split == 'test'):
+                        continue
                     sample = {
                         'path'  : os.path.join(category_path, image),       # Path to load image
                         'label' : label_num                                 # The corresponding label
