@@ -149,7 +149,7 @@ if __name__ == '__main__':
     # Quantize the model
     model_int8 = torch.quantization.quantize_dynamic(
                   model.to('cpu'),  # the original model
-                  {torch.nn.Linear},  # a set of layers to dynamically quantize
+                  {torch.nn.Linear, torch.nn.Conv2d, torch.nn.BatchNorm2d},  # a set of layers to dynamically quantize
                   dtype=torch.qint8)  # the target dtype for quantized weights
     
     # Quantised model not supported for mps backend
@@ -160,5 +160,5 @@ if __name__ == '__main__':
     print(col.BLUE, f"Quantized Model Accuracy: {accuracy:.2f}")
 
     # Save Model
-    torch.save(model.state_dict(), cfg.model_path.replace(".zip", "_quant.zip"))
+    torch.save(model_int8.state_dict(), cfg.model_path.replace(".zip", "_quant.zip"))
 
