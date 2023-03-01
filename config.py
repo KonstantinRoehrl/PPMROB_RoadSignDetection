@@ -8,6 +8,7 @@ import sys
 working_dir = Path(__file__).parent
 dataset_path = os.path.join(working_dir, "roadSignSet")
 model_path = os.path.join(working_dir, "weights", "best_model.zip")
+model_quant_path = os.path.join(working_dir, "weights", "best_model_quant.zip")
 
 # Create weight folder, if doesn't exist
 if not os.path.exists(os.path.join(working_dir, 'weights')):
@@ -19,11 +20,13 @@ if not os.path.exists(os.path.join(working_dir, 'weights')):
 model_class = torchvision.models.resnet18      # Accuracy 100%
 #model_class = torchvision.models.resnet50       # Accuracy 95.4 
 
+# Quantized resnet
+#model_class = torchvision.models.quantization.resnet18
 
 # TRAINING PARAMETERS
 LEARNING_RATE = 0.0001
 BATCH_SIZE = 16
-EPOCHS = 20
+EPOCHS = 10
 
 # DEVICE
 if sys.platform == 'linux':

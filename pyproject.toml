@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "ppmrob-roadsigndetection"
+version = "0.1.0"
+description = ""
+authors = ["Yikai Yang <yikai.yang@outlook.com>"]
+readme = "README.md"
+packages = [{include = "ppmrob_roadsigndetection"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+numpy = "^1.24.1"
+torch = "^1.13.1"
+opencv-python = "^4.7.0.68"
+scikit-learn = "^1.2.1"
+tqdm = "^4.64.1"
+matplotlib = "^3.7.0"
+drawnow = "^0.72.5"
+torchvision = "^0.14.1"
+torchviz = "^0.0.2"
+
+
+[tool.poetry.group.dev.dependencies]
+ipykernel = "^6.21.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

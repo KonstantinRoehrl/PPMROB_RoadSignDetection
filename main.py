@@ -6,6 +6,8 @@ import torchvision
 from sklearn.metrics import confusion_matrix
 from tqdm import tqdm
 import sys
+#from pytorch_quantization import quant_modules
+#quant_modules.initialize()
 
 from dataloader import RoadSignSet
 import config as cfg
@@ -111,12 +113,16 @@ if __name__ == '__main__':
     test_loader = torch.utils.data.DataLoader(test_set, batch_size=cfg.BATCH_SIZE, shuffle=True)
 
     # Model
-    model = cfg.model_class(num_classes=4)
+    if cfg.model_class == torchvision.models.quantization.resnet18:
+      model = cfg.model_class(num_classes=4, quantize=True)
+    else:
+      model = cfg.model_class(num_classes=4)
     model.to(cfg.DEVICE)
 
     # Loss and optimizer
     criterion = torch.nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=cfg.LEARNING_RATE)
+    print(list(model.parameters()))
+    optimizer = optim.Adam(list(model.parameters()), lr=cfg.LEARNING_RATE)
 
     # Verifying random initialisation => ~25% accuracy
     best_accuracy = 0.
@@ -139,26 +145,26 @@ if __name__ == '__main__':
             # Won't get any better
             break
 
-    # Training finished. Let's quantize the model
+    # # Training finished. Let's quantize the model
 
-    # Workaround on Mac for quantized backend
-    # https://github.com/pytorch/pytorch/issues/29327      
-    if sys.platform == 'darwin':
-      torch.backends.quantized.engine = 'qnnpack'
+    # # Workaround on Mac for quantized backend
+    # # https://github.com/pytorch/pytorch/issues/29327      
+    # if sys.platform == 'darwin':
+    #   torch.backends.quantized.engine = 'qnnpack'
     
-    # Quantize the model
-    model_int8 = torch.quantization.quantize_dynamic(
-                  model.to('cpu'),  # the original model
-                  {torch.nn.Linear, torch.nn.Conv2d, torch.nn.BatchNorm2d},  # a set of layers to dynamically quantize
-                  dtype=torch.qint8)  # the target dtype for quantized weights
+    # # Quantize the model
+    # model_int8 = torch.quantization.quantize_dynamic(
+    #               model.to('cpu'),  # the original model
+    #               {torch.nn.Linear, torch.nn.Conv2d, torch.nn.BatchNorm2d},  # a set of layers to dynamically quantize
+    #               dtype=torch.qint8)  # the target dtype for quantized weights
     
-    # Quantised model not supported for mps backend
-    cfg.DEVICE = torch.device('cpu')
+    # # Quantised model not supported for mps backend
+    # cfg.DEVICE = torch.device('cpu')
 
-    # Check quantised model accuracy
-    accuracy = eval(data_loader=test_loader, model=model_int8)
-    print(col.BLUE, f"Quantized Model Accuracy: {accuracy:.2f}")
+    # # Check quantised model accuracy
+    # accuracy = eval(data_loader=test_loader, model=model_int8)
+    # print(col.BLUE, f"Quantized Model Accuracy: {accuracy:.2f}")
 
-    # Save Model
-    torch.save(model_int8.state_dict(), cfg.model_path.replace(".zip", "_quant.zip"))
+    # # Save Model
+    # torch.save(model_int8.state_dict(), cfg.model_path.replace(".zip", "_quant.zip"))
 

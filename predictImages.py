@@ -56,7 +56,7 @@ if __name__ == '__main__':
     model.to(cfg.DEVICE)
 
     if os.path.exists(cfg.model_path):
-        model.load_state_dict(torch.load(cfg.model_path))
+        model.load_state_dict(torch.load(cfg.model_path), strict=False)
     else:
         raise FileNotFoundError("No weights found! Please run training first.")
 
