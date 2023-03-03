@@ -24,9 +24,11 @@ if __name__ == '__main__':
     if not os.path.exists(os.path.join(working_dir, 'profiling')):
         os.mkdir(os.path.join(working_dir, 'profiling'))
 
-    path = get_quantized_model_path(Mode.QUANTIZATION_AWARE_TRAINING_QUANTIZATION_FUSED)
-
+  
+    path = cfg.model_path
     model = load_model(path)
+
+    path = get_quantized_model_path(Mode.QUANTIZATION_AWARE_TRAINING_QUANTIZATION_FUSED)
     quantized_model = load_model(path, model_class=torchvision.models.quantization.resnet18)
 
     profiling_models = [quantized_model, model]

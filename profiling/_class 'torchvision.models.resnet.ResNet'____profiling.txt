@@ -1,16 +1,16 @@
 ---------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  
                              Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg    # of Calls  
 ---------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  
-                  model_inference         5.78%     246.774ms       100.00%        4.273s        4.273s             1  
-                     aten::conv2d         0.00%      99.000us        69.66%        2.977s     148.828ms            20  
-                aten::convolution         0.01%     371.000us        69.66%        2.976s     148.823ms            20  
-               aten::_convolution         0.01%     223.000us        69.65%        2.976s     148.804ms            20  
-         aten::mkldnn_convolution        69.63%        2.975s        69.64%        2.976s     148.793ms            20  
-                 aten::batch_norm         0.00%      68.000us        12.83%     548.047ms      27.402ms            20  
-     aten::_batch_norm_impl_index         0.01%     226.000us        12.82%     547.979ms      27.399ms            20  
-          aten::native_batch_norm        12.80%     547.070ms        12.82%     547.714ms      27.386ms            20  
-                 aten::max_pool2d         0.00%       8.000us         7.16%     305.916ms     305.916ms             1  
-    aten::max_pool2d_with_indices         7.16%     305.908ms         7.16%     305.908ms     305.908ms             1  
+                  model_inference         5.72%     242.661ms       100.00%        4.239s        4.239s             1  
+                     aten::conv2d         0.00%     113.000us        69.54%        2.948s     147.387ms            20  
+                aten::convolution         0.01%     423.000us        69.54%        2.948s     147.381ms            20  
+               aten::_convolution         0.01%     226.000us        69.53%        2.947s     147.360ms            20  
+         aten::mkldnn_convolution        69.51%        2.946s        69.52%        2.947s     147.349ms            20  
+                 aten::batch_norm         0.00%      75.000us        12.75%     540.309ms      27.015ms            20  
+     aten::_batch_norm_impl_index         0.01%     229.000us        12.74%     540.234ms      27.012ms            20  
+          aten::native_batch_norm        12.72%     539.332ms        12.74%     539.960ms      26.998ms            20  
+                 aten::max_pool2d         0.00%       9.000us         7.16%     303.634ms     303.634ms             1  
+    aten::max_pool2d_with_indices         7.16%     303.625ms         7.16%     303.625ms     303.625ms             1  
 ---------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  
-Self CPU time total: 4.273s
+Self CPU time total: 4.239s
 
